@@ -1,0 +1,47 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
+using Survey_Basket.Authentication;
+using Survey_Basket.Contracts.Authentication;
+
+namespace Survey_Basket.Controller;
+[Route("[controller]")]
+[ApiController]
+
+public class AuthController(IAuthService authService) : ControllerBase
+{
+    private readonly IAuthService authService = authService;
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] loginRequest request)
+    {
+        var authResponse = await authService.GetTokenAsync(request.Email, request.Password);
+        if (authResponse == null)
+        {
+            return BadRequest("Invalid email/password");
+        }
+        return Ok(authResponse);
+    }
+
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    {
+        var authResponse = await authService.GetRefreshTokenAsync(request.Token, request.RefreshToken);
+        if (authResponse == null)
+        {
+            return BadRequest("Invalid Token");
+        }
+        return Ok(authResponse);
+    }
+
+    [HttpPost("revoke-refresh-token")]
+    public async Task<IActionResult> RevokeToken([FromBody] RefreshTokenRequest request)
+    {
+        var result = await authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken);
+        if (!result)
+        {
+            return BadRequest("Invalid Token");
+        }
+        return Ok("Token revoked successfully");
+    }
+}
