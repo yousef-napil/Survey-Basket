@@ -9,7 +9,8 @@ using Microsoft.IdentityModel.Tokens;
 using Survey_Basket.Authentication;
 using Survey_Basket.Mapping;
 using Survey_Basket.Persistence;
-using Survey_Basket.Repositories.Polls;
+using Survey_Basket.Repositories;
+using Survey_Basket.Services;
 
 namespace Survey_Basket;
 
@@ -25,6 +26,12 @@ public static class DependencyInjection
             .AddFluentValidation();
         //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IPollRepository, PollRepository>();
+        services.AddScoped<IQuestionRepository, QuestionRepository>();
+        services.AddScoped<IPollService , PollService>();
+        services.AddScoped<IQuestionService, QuestionService>();
+
+        services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddProblemDetails();
         return services;
     }
 

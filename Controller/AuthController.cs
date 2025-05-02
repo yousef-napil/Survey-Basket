@@ -16,11 +16,13 @@ public class AuthController(IAuthService authService) : ControllerBase
     public async Task<IActionResult> Login([FromBody] loginRequest request)
     {
         var authResponse = await authService.GetTokenAsync(request.Email, request.Password);
-        if (authResponse == null)
-        {
-            return BadRequest("Invalid email/password");
-        }
-        return Ok(authResponse);
+        return authResponse.Match(
+                Ok,
+                error => Problem(statusCode: StatusCodes.Status401Unauthorized,
+                    title: error.Title,
+                    detail: error.Description
+                )
+            );
     }
 
     [HttpPost("refresh-token")]

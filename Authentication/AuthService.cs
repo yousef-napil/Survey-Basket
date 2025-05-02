@@ -1,5 +1,7 @@
 ﻿using System.Security.Cryptography;
+using OneOf;
 using Survey_Basket.Contracts.Authentication;
+using Survey_Basket.Errors;
 
 namespace Survey_Basket.Authentication;
 
@@ -10,14 +12,14 @@ public class AuthService(UserManager<ApplicationUser> userManager
     private readonly IJWTProvider jwtProvider = jwtProvider;
     private readonly int refreshTokenExpiryDays = 14;
 
-    public async Task<AuthResponse?> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
+    public async Task<OneOf<AuthResponse , Error>> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
     {
         var user = await userManager.FindByEmailAsync(email);
         if (user is null)
-            return null;
+            return UserErrors.InvalidEmailOrPassword;
         var isPasswordValid = await userManager.CheckPasswordAsync(user, password);
         if (!isPasswordValid)
-            return null;
+            return UserErrors.InvalidEmailOrPassword;
 
         var (token, expiresIn) = jwtProvider.GenerateToken(user);
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Survey_Basket.Persistence;
 
@@ -11,9 +12,11 @@ using Survey_Basket.Persistence;
 namespace Survey_Basket.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250422194041_added auditableEntity for poll")]
+    partial class addedauditableEntityforpoll
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -155,50 +158,6 @@ namespace Survey_Basket.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Survey_Basket.Entities.Answer", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("CreatedById")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UpdatedById")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("UpdatedById");
-
-                    b.HasIndex("QuestionId", "Content")
-                        .IsUnique();
-
-                    b.ToTable("Answers");
-                });
-
             modelBuilder.Entity("Survey_Basket.Entities.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -283,7 +242,6 @@ namespace Survey_Basket.Persistence.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CreatedById")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedOn")
@@ -324,50 +282,6 @@ namespace Survey_Basket.Persistence.Migrations
                     b.HasIndex("UpdatedById");
 
                     b.ToTable("Polls");
-                });
-
-            modelBuilder.Entity("Survey_Basket.Entities.Question", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("CreatedById")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("PollId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UpdatedById")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("UpdatedById");
-
-                    b.HasIndex("PollId", "Content")
-                        .IsUnique();
-
-                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -421,31 +335,6 @@ namespace Survey_Basket.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Survey_Basket.Entities.Answer", b =>
-                {
-                    b.HasOne("Survey_Basket.Entities.ApplicationUser", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Survey_Basket.Entities.Question", "Question")
-                        .WithMany("Answers")
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Survey_Basket.Entities.ApplicationUser", "UpdatedBy")
-                        .WithMany()
-                        .HasForeignKey("UpdatedById");
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("Question");
-
-                    b.Navigation("UpdatedBy");
-                });
-
             modelBuilder.Entity("Survey_Basket.Entities.ApplicationUser", b =>
                 {
                     b.OwnsMany("Survey_Basket.Entities.RefreshToken", "refreshTokens", b1 =>
@@ -487,9 +376,7 @@ namespace Survey_Basket.Persistence.Migrations
                 {
                     b.HasOne("Survey_Basket.Entities.ApplicationUser", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("CreatedById");
 
                     b.HasOne("Survey_Basket.Entities.ApplicationUser", "UpdatedBy")
                         .WithMany()
@@ -498,36 +385,6 @@ namespace Survey_Basket.Persistence.Migrations
                     b.Navigation("CreatedBy");
 
                     b.Navigation("UpdatedBy");
-                });
-
-            modelBuilder.Entity("Survey_Basket.Entities.Question", b =>
-                {
-                    b.HasOne("Survey_Basket.Entities.ApplicationUser", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Survey_Basket.Entities.Poll", "Poll")
-                        .WithMany()
-                        .HasForeignKey("PollId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Survey_Basket.Entities.ApplicationUser", "UpdatedBy")
-                        .WithMany()
-                        .HasForeignKey("UpdatedById");
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("Poll");
-
-                    b.Navigation("UpdatedBy");
-                });
-
-            modelBuilder.Entity("Survey_Basket.Entities.Question", b =>
-                {
-                    b.Navigation("Answers");
                 });
 #pragma warning restore 612, 618
         }
