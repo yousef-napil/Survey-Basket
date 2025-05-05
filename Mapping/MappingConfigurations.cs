@@ -1,4 +1,5 @@
 ﻿using Survey_Basket.Contracts.Answer;
+using Survey_Basket.Contracts.Authentication;
 using Survey_Basket.Contracts.Question;
 
 namespace Survey_Basket.Mapping;
@@ -12,5 +13,8 @@ public class MappingConfigurations : IRegister
 
         config.NewConfig<Question, QuestionResponse>()
             .Map(dest => dest.Answers, src => src.Answers.Select(a => new AnswerResponse(a.Id, a.Content)));
+
+        config.NewConfig<RegisterRequest, ApplicationUser>()
+            .Map(dest => dest.UserName, src => src.Email);
     }
 }

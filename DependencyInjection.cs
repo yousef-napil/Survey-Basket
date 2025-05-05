@@ -3,9 +3,11 @@ using System.Text;
 using FluentValidation.AspNetCore;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Survey_Basket.Abstractions.Settings;
 using Survey_Basket.Authentication;
 using Survey_Basket.Mapping;
 using Survey_Basket.Persistence;
@@ -27,11 +29,16 @@ public static class DependencyInjection
         //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IPollRepository, PollRepository>();
         services.AddScoped<IQuestionRepository, QuestionRepository>();
+        services.AddScoped<IVoteRepository, VoteRepository>();
         services.AddScoped<IPollService , PollService>();
         services.AddScoped<IQuestionService, QuestionService>();
+        services.AddScoped<IVoteService, VoteService>();
+        services.AddScoped<IEmailSender, EmailSender>();
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
+        services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+        services.AddHttpContextAccessor();
         return services;
     }
 
@@ -63,7 +70,8 @@ public static class DependencyInjection
         services.AddSingleton<IJWTProvider, JWTProvider>();
 
         services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationContext>();
+            .AddEntityFrameworkStores<ApplicationContext>()
+            .AddDefaultTokenProviders();
 
         services.AddOptions<JwtOptions>()
             .Bind(configuration.GetSection(nameof(JwtOptions.Jwt)))
@@ -90,6 +98,13 @@ public static class DependencyInjection
                 ValidAudience = jwtSettings?.Audience,
                 
             };
+        });
+
+        services.Configure<IdentityOptions>(options =>
+        {
+            options.Password.RequiredLength = 8;
+            options.SignIn.RequireConfirmedEmail = true;
+            options.User.RequireUniqueEmail = true;
         });
 
 

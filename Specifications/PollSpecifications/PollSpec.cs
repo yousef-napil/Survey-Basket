@@ -12,4 +12,6 @@ public class PollSpec : BaseSpecification<Poll>
     {
         AddCriteria(x => x.Id == id);
     }
+
+    
 }

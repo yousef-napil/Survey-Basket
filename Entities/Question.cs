@@ -9,4 +9,5 @@ public sealed class Question : AuditableEntity
 
     public Poll Poll { get; set; } = default!;
     public List<Answer> Answers { get; set; } = new();
+    public ICollection<VoteAnswer> Votes { get; set; } = [];
 }

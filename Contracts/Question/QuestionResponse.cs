@@ -3,7 +3,7 @@
 namespace Survey_Basket.Contracts.Question;
 
 public record QuestionResponse(
-        int id,
+        int Id,
         string Content,
         List<AnswerResponse> Answers
 );

@@ -33,6 +33,16 @@ public class PollsController : ControllerBase
             error => error.ToProblem(StatusCodes.Status404NotFound)
         );
     }
+    
+    [HttpGet("Active")]
+    public async Task<IActionResult> GetCurrentPolls(CancellationToken cancellationToken)
+    {
+        var pollResults = await pollService.GetCurrentAsync(cancellationToken);
+        return pollResults.Match(
+            Ok,
+            error => error.ToProblem(StatusCodes.Status404NotFound)
+        );
+    }
 
 
     [HttpGet("{id}")]

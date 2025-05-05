@@ -5,6 +5,7 @@ namespace Survey_Basket.Services;
 public interface IPollService
 {
     Task<OneOf<IReadOnlyList<PollResponse>, Error>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<OneOf<IReadOnlyList<PollResponse>, Error>> GetCurrentAsync(CancellationToken cancellationToken = default);
 
     Task<OneOf<PollResponse, Error>> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 

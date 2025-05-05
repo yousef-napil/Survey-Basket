@@ -11,6 +11,8 @@ public class ApplicationContext(DbContextOptions<ApplicationContext> options , I
     public DbSet<Poll> Polls => Set<Poll>();
     public DbSet<Question> Questions => Set<Question>();
     public DbSet<Answer> Answers => Set<Answer>();
+    public DbSet<Vote> Votes => Set<Vote>();
+    public DbSet<VoteAnswer> VoteAnswers => Set<VoteAnswer>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

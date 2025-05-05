@@ -27,6 +27,18 @@ public class PollService : IPollService
         return OneOf<IReadOnlyList<PollResponse>, Error>.FromT0(result);
     }
 
+    public async Task<OneOf<IReadOnlyList<PollResponse>, Error>> GetCurrentAsync(CancellationToken cancellationToken = default)
+    {
+        
+        var spec = new CurrentPollSpec();
+        var polls = await pollRepository.GetAllAsyncWithSpec(spec, cancellationToken);
+        if (polls.Count == 0)
+            return PollErrors.NotFound;
+        var result = polls.Where(x => x.IsPublished).Adapt<IReadOnlyList<PollResponse>>();
+        return OneOf<IReadOnlyList<PollResponse>, Error>.FromT0(result);
+    }
+
+
     public async Task<OneOf<PollResponse, Error>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var spec = new PollSpec(id);

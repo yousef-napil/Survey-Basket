@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Survey_Basket.Abstractions;
 using Survey_Basket.Authentication;
 using Survey_Basket.Contracts.Authentication;
 
@@ -23,6 +23,33 @@ public class AuthController(IAuthService authService) : ControllerBase
                     detail: error.Description
                 )
             );
+    }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    {
+        var authResponse = await authService.RegisterAsync(request);
+        if (authResponse is null)
+            return Ok("User registered successfully");
+        return authResponse.ToProblem(authResponse.StatusCode);
+    }
+
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail(ConfirmEmailRequest request)
+    {
+        var user = await authService.ConfirmEmailAsync(request);
+        if (user is null)
+            return Ok("User Email confirmed");
+        return user.ToProblem(user.StatusCode);
+    }
+
+    [HttpPost("Reset-confirm-email")]
+    public async Task<IActionResult> ResetConfirmEmail([FromBody] ResendConfirmationEmail request)
+    {
+        var user = await authService.ResendConfirmationEmailAsync(request);
+        if (user is null)
+            return Ok("Confirmation Email Sent successfully");
+        return user.ToProblem(user.StatusCode);
     }
 
     [HttpPost("refresh-token")]

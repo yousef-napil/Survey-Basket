@@ -5,4 +5,5 @@ namespace Survey_Basket.Repositories;
 public interface IPollRepository : IGenericRepository<Poll>
 {
     Task<bool> CheckPollTitleExists(PollTitleExistsSpec titleExists, CancellationToken cancellationToken = default);
+    Task<bool> IsPollActive(int pollId, CancellationToken cancellationToken = default);
 }

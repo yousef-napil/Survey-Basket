@@ -14,4 +14,7 @@ public class PollRepository : GenericRepository<Poll>, IPollRepository
 
     public async Task<bool> CheckPollTitleExists(PollTitleExistsSpec titleExists, CancellationToken cancellationToken = default)
     => await context.Polls.AnyAsync(titleExists.Any, cancellationToken);
+
+    public async Task<bool> IsPollActive(int pollId, CancellationToken cancellationToken = default)
+    =>await context.Polls.AnyAsync(x => x.Id == pollId && x.IsPublished && x.StartsAt <= DateOnly.FromDateTime(DateTime.UtcNow));
 }

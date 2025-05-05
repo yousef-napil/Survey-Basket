@@ -23,6 +23,8 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
             Ok,
             error => error.ToProblem(error.StatusCode));
     }
+    
+    
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetQuestion([FromRoute] int pollId, [FromRoute] int id, CancellationToken cancellationToken)

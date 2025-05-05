@@ -6,12 +6,14 @@ using Survey_Basket.Specifications.QuestionSpecifications;
 
 namespace Survey_Basket.Services;
 
-public class QuestionService(IPollRepository pollRepository, IQuestionRepository questionRepository) : IQuestionService
+public class QuestionService(IPollRepository pollRepository, 
+                             IQuestionRepository questionRepository ,
+                             IVoteRepository voteRepository
+                             ) : IQuestionService
 {
     private readonly IPollRepository pollRepository = pollRepository;
     private readonly IQuestionRepository questionRepository = questionRepository;
-
-    
+    private readonly IVoteRepository voteRepository = voteRepository;
 
     public async Task<OneOf<IReadOnlyList<QuestionResponse>, Error>> GetAllAsync(int pollId, CancellationToken cancellationToken = default)
     {
@@ -21,6 +23,22 @@ public class QuestionService(IPollRepository pollRepository, IQuestionRepository
         var questions = await questionRepository.GetAllAsyncWithSpec(new QuestionSpec(pollId), cancellationToken);
         if (questions is null)
             return QuestionErrors.NotFound;
+        return OneOf<IReadOnlyList<QuestionResponse>, Error>.FromT0(questions.Adapt<IReadOnlyList<QuestionResponse>>());
+    }
+
+    public async Task<OneOf<IReadOnlyList<QuestionResponse>, Error>> GetActiveAsync(int pollId, string userId , CancellationToken cancellationToken = default)
+    {
+        var isPollActive = await pollRepository.IsPollActive(pollId, cancellationToken);
+        if (!isPollActive)
+            return PollErrors.NotFound;
+        var hasVoted = await voteRepository.HasVoted(pollId, userId, cancellationToken);
+        if (hasVoted)
+            return VoteErrors.AlreadyVoted;
+        var questions = await questionRepository.GetAllAsyncWithSpec(new ActiveQuestionSpec(pollId), cancellationToken);
+        
+        if (questions is null)
+            return QuestionErrors.NotFound;
+        
         return OneOf<IReadOnlyList<QuestionResponse>, Error>.FromT0(questions.Adapt<IReadOnlyList<QuestionResponse>>());
     }
 
