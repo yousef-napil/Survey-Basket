@@ -26,5 +26,15 @@ public static class UserErrors
         "Email Already Confirmed",
         StatusCodes.Status400BadRequest);
 
+    public static readonly Error UserNotFound = new(
+        "User.UserNotFound",
+        "User Not Found",
+        StatusCodes.Status404NotFound);
+
+    public static readonly Error UserUpdateFailed = new(
+        "User.UserUpdateFailed",
+        "User Update Failed",
+        StatusCodes.Status400BadRequest);
+
 }
 

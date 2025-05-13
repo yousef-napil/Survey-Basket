@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using Hangfire;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Survey_Basket.Contracts.Authentication;
@@ -164,7 +165,43 @@ public class AuthService(
         return null;
     }
 
-    private async Task SendConfirmationEmail(ApplicationUser user , string code)
+    public async Task<Error?> SendResetPasswordCodeAsync(string email)
+    {
+        if (await userManager.FindByEmailAsync(email) is not { } user)
+            return null ;
+
+        if (!user.EmailConfirmed)
+            return UserErrors.EmailNotConfirmed;
+
+
+        var code = await userManager.GeneratePasswordResetTokenAsync(user);
+        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+        logger.LogInformation("confirmation code {code}", code);
+        BackgroundJob.Enqueue(() => SendPasswordResetEmail(user, code));
+        return null;
+    }
+
+    public async Task<Error?> ResetPasswordAsync(ResetPasswordRequest request)
+    {
+        var user = await userManager.FindByEmailAsync(request.Email);
+        IdentityResult result;
+        try
+        {
+            var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Code));
+            result = await userManager.ResetPasswordAsync(user! , code, request.NewPassword);
+        }
+        catch (FormatException)
+        {
+            result = IdentityResult.Failed(userManager.ErrorDescriber.InvalidToken());
+        }
+        if (result.Succeeded)
+            return null;
+
+        var error = result.Errors.FirstOrDefault();
+        return new Error(error!.Code, error.Description, StatusCodes.Status401Unauthorized);
+    }
+
+    public async Task SendConfirmationEmail(ApplicationUser user , string code)
     {
         var origin = httpContextAccessor.HttpContext?.Request.Headers.Origin;
 
@@ -176,6 +213,23 @@ public class AuthService(
             });
         await emailSender.SendEmailAsync(user.Email! , "✅ Survey Basket: Email Confirmation" , emailBody);
     }
+    
+    public async Task SendPasswordResetEmail(ApplicationUser user , string code)
+    {
+        var origin = httpContextAccessor.HttpContext?.Request.Headers.Origin;
 
+        var emailBody = EmailBodyBuilder.GenerateEmailBody("ForgetPassword",
+            new Dictionary<string, string>
+            {
+                { "{{name}}" , user.FirstName },
+                { "{{action_url}}" , $"{origin}/auth/PasswordReset?userId={user.Id}&code={code}" }
+            });
+        await emailSender.SendEmailAsync(user.Email! , "✅ Survey Basket: Password Reset", emailBody);
+    }
+
+
+    
     private static string GenerateRefreshToken() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+    
 }

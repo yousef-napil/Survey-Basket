@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Survey_Basket.Persistence;
 
-public class ApplicationContext(DbContextOptions<ApplicationContext> options , IHttpContextAccessor httpContext) : IdentityDbContext<ApplicationUser>(options)
+public class ApplicationContext(DbContextOptions<ApplicationContext> options , IHttpContextAccessor httpContext)
+    : IdentityDbContext<ApplicationUser , ApplicationRole , string>(options)
 {
     private readonly IHttpContextAccessor httpContext = httpContext;
 

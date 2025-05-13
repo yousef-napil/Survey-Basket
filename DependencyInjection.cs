@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Text;
 using FluentValidation.AspNetCore;
+using Hangfire;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -25,7 +26,9 @@ public static class DependencyInjection
             .AddDbContextConfig(configuration)
             .AddIdentityConfig(configuration)
             .AddMapsterConfig()
-            .AddFluentValidation();
+            .AddFluentValidation()
+            .AddHangFireConfig(configuration);
+
         //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IPollRepository, PollRepository>();
         services.AddScoped<IQuestionRepository, QuestionRepository>();
@@ -34,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IQuestionService, QuestionService>();
         services.AddScoped<IVoteService, VoteService>();
         services.AddScoped<IEmailSender, EmailSender>();
+        services.AddScoped<IUserService, UserService>();
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
@@ -69,7 +73,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddSingleton<IJWTProvider, JWTProvider>();
 
-        services.AddIdentity<ApplicationUser, IdentityRole>()
+        services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<ApplicationContext>()
             .AddDefaultTokenProviders();
 
@@ -107,6 +111,18 @@ public static class DependencyInjection
             options.User.RequireUniqueEmail = true;
         });
 
+
+        return services;
+    }
+
+    private static IServiceCollection AddHangFireConfig(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddHangfire(config => config
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+        services.AddHangfireServer();
 
         return services;
     }

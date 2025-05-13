@@ -1,3 +1,4 @@
+using Hangfire;
 using Serilog;
 using Survey_Basket;
 using Survey_Basket.Persistence;
@@ -22,6 +23,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json" , "v1"));
+    app.UseHangfireDashboard("/Jobs");
 }
 
 app.UseSerilogRequestLogging();
